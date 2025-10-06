@@ -578,7 +578,7 @@ The following %-sequences are supported:
      ("Y"   "Cherries"             magit-cherry)
      ("z"   "Stash"                magit-stash)
      ("!"   "Run"                  magit-run)
-     ("%"   "Worktree"             magit-worktree)]])))
+     ("Z"   "Worktree"             magit-worktree)]])))
 
 (provide 'transient-dwim)
 
