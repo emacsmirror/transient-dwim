@@ -1,175 +1,133 @@
+#+title: transient-dwim.el
 #+author: conao3
-#+date: <2020-01-20 Mon>
 
-[[https://github.com/conao3/transient-dwim.el][https://raw.githubusercontent.com/conao3/files/master/blob/headers/png/transient-dwim.el.png]]
 [[https://github.com/conao3/transient-dwim.el/blob/master/LICENSE][https://img.shields.io/github/license/conao3/transient-dwim.el.svg?style=flat-square]]
 [[https://github.com/conao3/transient-dwim.el/releases][https://img.shields.io/github/tag/conao3/transient-dwim.el.svg?style=flat-square]]
 [[https://github.com/conao3/transient-dwim.el/actions][https://github.com/conao3/transient-dwim.el/workflows/Main%20workflow/badge.svg]]
-[[https://app.codacy.com/project/conao3/transient-dwim.el/dashboard][https://img.shields.io/codacy/grade/62a36f4f04524d5e8c758440e8071c45.svg?logo=codacy&style=flat-square]]
-[[https://twitter.com/conao_3][https://img.shields.io/badge/twitter-@conao__3-blue.svg?logo=twitter&style=flat-square]]
-[[https://conao3-support.slack.com/join/shared_invite/enQtNjUzMDMxODcyMjE1LWUwMjhiNTU3Yjk3ODIwNzAxMTgwOTkxNmJiN2M4OTZkMWY0NjI4ZTg4MTVlNzcwNDY2ZjVjYmRiZmJjZDU4MDE][https://img.shields.io/badge/chat-on_slack-blue.svg?logo=slack&style=flat-square]]
 
-* Table of Contents
-- [[#description][Description]]
-- [[#install][Install]]
-- [[#usage][Usage]]
-- [[#customize][Customize]]
-- [[#syntaxes][Syntaxes]]
-- [[#information][Information]]
-  - [[#create-new-transient-menu][Create new transient menu]]
-  - [[#community][Community]]
-  - [[#contribution][Contribution]]
-  - [[#migration][Migration]]
-  - [[#license][License]]
-  - [[#author][Author]]
-  - [[#contributors][Contributors]]
+Context-aware transient menus for Emacs.
 
-* Description
-Using ~transient~ to display the preconfigured ~transient~
-dispatcher for your situation (major-mode or installed packages).
+* Overview
 
-By installing this package, if you want to know what features
-exist in major-mode for the first time, or if you want to use a
-package you can't remember keybindings for, pressing ~M-=~ (if
-you're using the recommended settings) will be your first step.
+transient-dwim provides a unified entry point to discover and access commands available in your current context. Instead of memorizing keybindings for every mode and package, simply press one key to reveal a clean, organized menu of available actions.
 
-You don't have to remember the cumbersome keybindings since
-now. Just look at the neatly aligned menu and press the key that
-appears.
+This is especially useful when:
+- Exploring a major mode for the first time
+- Working with packages you don't use frequently
+- Wanting a quick reference of available commands
 
-- dired-mode
+* Screenshots
 
-  [[https://raw.githubusercontent.com/conao3/files/master/blob/transient-dwim.el/dired-dispatch.png]]
+** dired-mode
+[[https://raw.githubusercontent.com/conao3/files/master/blob/transient-dwim.el/dired-dispatch.png]]
 
-- magit
+** magit
+[[https://raw.githubusercontent.com/conao3/files/master/blob/transient-dwim.el/magit-dispatch.png]]
 
-  [[https://raw.githubusercontent.com/conao3/files/master/blob/transient-dwim.el/magit-dispatch.png]]
+** origami
+[[https://raw.githubusercontent.com/conao3/files/master/blob/transient-dwim.el/origami-dispatch.png]]
 
-- origami
+* Installation
 
-  [[https://raw.githubusercontent.com/conao3/files/master/blob/transient-dwim.el/origami-dispatch.png]]
-
-* Install
 #+begin_src emacs-lisp
-  (leaf transient-dwim
-    :ensure t
-    :bind ("M-=" . transient-dwim-dispatch))
+(use-package transient-dwim
+  :ensure t
+  :bind ("M-=" . transient-dwim-dispatch))
+#+end_src
+
+Or with leaf:
+
+#+begin_src emacs-lisp
+(leaf transient-dwim
+  :ensure t
+  :bind ("M-=" . transient-dwim-dispatch))
 #+end_src
 
 * Usage
-Just press ~M-=~, or ~M-x transient-dwim-dispatch~.
 
-Currently, transient menu for below major-mode/minor-mode are available.
+Press =M-== or run =M-x transient-dwim-dispatch=.
 
-- Major-mode
-  - dired-mode (builtin)
-    - image-dired-thumbnail-mode (builtin)
-  - neotree-mode
-  - magit-mode
-- Minor-mode
-  - origami-mode
-- Packages
-  - magit ([[https://github.com/magit/magit][repo]])
-  - neotree ([[https://github.com/jaypei/emacs-neotree][repo]])
-  - dired-git ([[https://github.com/conao3/dired-git.el][repo]])
-  - origami ([[https://github.com/gregsexton/origami.el][repo]])
+The menu will display commands relevant to your current context, whether that's a specific major mode, active minor mode, or installed package.
 
-* Customize
-Customize transient menu by PR :)
+** Supported Modes and Packages
 
-Or reference [[https://github.com/magit/transient/blob/master/docs/transient.org#modifying-existing-transients][transient manual]].
+| Category   | Mode/Package                     |
+|------------+----------------------------------|
+| Major Mode | dired-mode (built-in)            |
+|            | image-dired-thumbnail-mode       |
+|            | neotree-mode                     |
+|            | magit-mode                       |
+| Minor Mode | origami-mode                     |
+| Packages   | [[https://github.com/magit/magit][magit]]                            |
+|            | [[https://github.com/jaypei/emacs-neotree][neotree]]                          |
+|            | [[https://github.com/conao3/dired-git.el][dired-git]]                        |
+|            | [[https://github.com/gregsexton/origami.el][origami]]                          |
 
-* Information
-** Create new transient menu
-Create interaction function list via below code, and bind appropriate key.
+* Customization
 
-#+begin_src emacs-lisp
-  (ppp-list
-   (cl-flet ((get-summary (str) (replace-regexp-in-string "\\(.*\\)\n.*" "\\1" str)))
-     (let (elm info)
-       (with-current-buffer "neotree.el"  ; some target package
-         (save-excursion
-           (goto-char (point-min))
-           (while (setq elm (ignore-errors (read (current-buffer))))
-             (pcase elm
-               (`(,(or 'defun 'cl-defun) ,fn ,args (interactive) . ,body)
-                (push `(,fn . "") info))
-               (`(,(or 'defun 'cl-defun) ,fn ,args (interactive . ,_) . ,body)
-                (push `(,fn . "") info))
-               (`(,(or 'defun 'cl-defun) ,fn ,args ,docstring (interactive) . ,body)
-                (push `(,fn . ,(get-summary docstring)) info))
-               (`(,(or 'defun 'cl-defun) ,fn ,args ,docstring (interactive . ,_) . ,body)
-                (push `(,fn . ,(get-summary docstring)) info))))))
-       (mapcar (lambda (elm) `("" ,(cdr elm) ,(car elm))) (nreverse info)))))
-#+end_src
+To modify the built-in menus, see the [[https://github.com/magit/transient/blob/master/docs/transient.org#modifying-existing-transients][transient manual]] for guidance on extending transient commands.
 
-Recommend make ~transient-detect-key-conflicts~ non-nil to detect key conflicts easy.
+Contributions for new menus or improvements are welcome via pull request.
+
+* Creating Custom Menus
+
+To create a transient menu for a package, you can generate a list of interactive functions:
 
 #+begin_src emacs-lisp
-  (leaf transient
-    :doc "Transient commands"
-    :req "emacs-25.1"
-    :tag "bindings" "emacs>=25.1"
-    :url "https://github.com/magit/transient"
-    :added "2020-03-25"
-    :emacs>= 25.1
-    :ensure t
-    :custom ((transient-detect-key-conflicts . t)))
+(ppp-list
+ (cl-flet ((get-summary (str) (replace-regexp-in-string "\\(.*\\)\n.*" "\\1" str)))
+   (let (elm info)
+     (with-current-buffer "neotree.el"  ; target package buffer
+       (save-excursion
+         (goto-char (point-min))
+         (while (setq elm (ignore-errors (read (current-buffer))))
+           (pcase elm
+             (`(,(or 'defun 'cl-defun) ,fn ,args (interactive) . ,body)
+              (push `(,fn . "") info))
+             (`(,(or 'defun 'cl-defun) ,fn ,args (interactive . ,_) . ,body)
+              (push `(,fn . "") info))
+             (`(,(or 'defun 'cl-defun) ,fn ,args ,docstring (interactive) . ,body)
+              (push `(,fn . ,(get-summary docstring)) info))
+             (`(,(or 'defun 'cl-defun) ,fn ,args ,docstring (interactive . ,_) . ,body)
+              (push `(,fn . ,(get-summary docstring)) info))))))
+     (mapcar (lambda (elm) `("" ,(cdr elm) ,(car elm))) (nreverse info)))))
 #+end_src
 
-** Community
-All feedback and suggestions are welcome!
+For easier debugging, enable key conflict detection:
 
-You can use github issues, but you can also use [[https://conao3-support.slack.com/join/shared_invite/enQtNjUzMDMxODcyMjE1LWUwMjhiNTU3Yjk3ODIwNzAxMTgwOTkxNmJiN2M4OTZkMWY0NjI4ZTg4MTVlNzcwNDY2ZjVjYmRiZmJjZDU4MDE][Slack]]
-if you want a more casual conversation.
-
-** Contribution
-We welcome PR!
-
-*** Require tools for testing
-- cask
-  - install via brew
-    #+begin_src shell
-      brew install cask
-    #+end_src
-
-  - manual install
-    #+begin_src shell
-      cd ~/
-      hub clone cask/cask
-      export PATH="$HOME/.cask/bin:$PATH"
-    #+end_src
-
-*** Running test
-Below operation flow is recommended.
-#+begin_src shell
-  make                              # Install git-hooks in local .git
-
-  git branch [feature-branch]       # Create branch named [feature-branch]
-  git checkout [feature-branch]     # Checkout branch named [feature-branch]
-
-  # <edit loop>
-  emacs transient-dwim.el           # Edit something you want
-
-  make test                         # Test transient-dwim via multi version Emacs
-  git commit -am "brabra"           # Commit (auto-run test before commit)
-  # </edit loop>
-
-  hub fork                          # Create fork at GitHub
-  git push [user] [feature-branch]  # Push feature-branch to your fork
-  hub pull-request                  # Create pull-request
+#+begin_src emacs-lisp
+(setq transient-detect-key-conflicts t)
 #+end_src
 
-** Migration
+* Contributing
 
-** License
-#+begin_example
-  General Public License Version 3 (GPLv3)
-  Copyright (c) Naoya Yamashita - https://conao3.com
-  https://github.com/conao3/transient-dwim.el/blob/master/LICENSE
-#+end_example
+Contributions are welcome. Please open an issue or submit a pull request.
 
-** Author
-- Naoya Yamashita ([[https://github.com/conao3][conao3]])
+** Development Setup
 
-** Contributors
+1. Install [[https://github.com/cask/cask][Cask]] for dependency management:
+
+   #+begin_src shell
+   brew install cask
+   #+end_src
+
+   Or manually:
+
+   #+begin_src shell
+   git clone https://github.com/cask/cask ~/.cask
+   export PATH="$HOME/.cask/bin:$PATH"
+   #+end_src
+
+2. Run the tests:
+
+   #+begin_src shell
+   make test
+   #+end_src
+
+* License
+
+GPL-3.0. See [[https://github.com/conao3/transient-dwim.el/blob/master/LICENSE][LICENSE]] for details.
+
+* Author
+
+Naoya Yamashita ([[https://github.com/conao3][conao3]])
